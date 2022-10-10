@@ -1,0 +1,135 @@
+<%- include ('partials/header') %>
+
+<script>
+    function doLike(self) {
+        var _id = self.getAttribute("data-id");
+        var isLiked = self.getAttribute("data-is-Liked")=="true";
+        if(!isLiked){
+            self.setAttribute("disabled", "disabled");
+            self.style.backgroundColor="darkgray";
+            self.style.color="white";
+        } 
+        
+        $.ajax({
+            url:"/do-like",
+            method:"POST",
+            data:{
+                "_id":_id
+            },
+            success: function (response) {
+                console.log(response);
+                if(response.status=="success"){
+                    self.style.backgroundColor="royalblue";
+                    self.style.color="white";
+                    var likes = parseInt(self.getAttribute("data-likes"));
+                    likes++;
+                    self.innerHTML="Like ("+likes +")";
+                    self.setAttribute("data-is-liked","true");
+
+                }else{
+                    alert(response.message);
+                    if(!isLiked){
+                        self.style.backgroundColor="#fff";
+                        self.style.color="black";
+                    }
+                }
+            }
+        });
+        return false;
+    }
+
+
+</script>
+
+<div class="display-100vh">
+<div class="row">
+    <div class="col-xl-12">
+        <div class="blog-carousel1 row justify-content-md-center">
+            <div class="container text-center p-5">
+                <img src="/public/images/1246351.svg" alt="" width="70px">
+                <h2 class="m-2"><%= requestedUser.name %></h2>
+                <h4>Posts: <%= images.length %></h4>
+                <% if(typeof isLogin !== "undefined" && isLogin){ %>
+                 <div class="container">
+                    <div class="row justify-content-md-center m-4">
+                        <div class="col-md-3"><span class="fw-bolder">
+                            <% if(requestedUser.followers){ %>
+                            <%= requestedUser.followers.length %> 
+                            <% } else { %>
+                                0
+                            <% } %>
+                        </span>Followers</div>
+                        <div class="col-md-3"><span class="fw-bold">
+                            <% if(requestedUser.following){ %>
+                            <%= requestedUser.following.length %>
+                            <% } else { %>
+                                0
+                            <% } %>
+                        </span> 
+                            Followings</div>
+                    </div>
+                 </div>
+                 <% if (ownProfile==false){ %>
+                
+                    <% if (following =='Follow'){ %>
+                    <form action="/follow" method="post">
+                    <button type="submit" class="btn btn-outline-primary" name="follow" value="<%= requestedUser._id %>" ><%= following %></button>
+                    </form>
+                    <% } else { %>
+                        <form action="/unfollow" method="post">
+                        <button type="submit" class="btn btn-primary" name="follow" value="<%= requestedUser._id %>" ><%= following %></button>
+                    </form>
+                    <% } %>
+                
+                <% } %>
+                <% } %>
+            </div>
+            <% if (typeof isLogin !== "undefined" && isLogin) { %>
+                <div class="container text-center m-3">
+                    <h3>Posts By <%= requestedUser.name %> </h3>
+                </div>
+            <% images.forEach(function(image){ %>
+                <div class="col-md-9 mb-4 ">
+                    <a href="/view-image?id=<%= image._id %>" class="blog-compact-item-container border rounded">
+                        <div class="blog-compact-item">
+                            <img src="<%= image.filePath %>">
+
+                            <% if(typeof isLogin !== "undefined" && isLogin){
+                                var hasLiked = false;
+                                image.likers.forEach(function(liker){
+                                    if(liker._id == user._id){
+                                        hasLiked=true;
+                                    }
+                                })
+                                if(hasLiked){ %>
+                                    <span data-is-liked="true" onclick="doLike(this);" data-id="<%= image._id %>" class="blog-item-tag liked">Like (<%= image.likers.length %>)</span>
+                                <% } else { %>
+                                    <span data-is-liked="false" onclick="doLike(this);" data-id="<%= image._id %>" class="blog-item-tag">Like (<%= image.likers.length %>)</span>
+                                <% }
+                            } else{ %>
+                                    <span data-is-liked="false" onclick="doLike(this);" data-id="<%= image._id %>" class="blog-item-tag">Like (<%= image.likers.length %>)</span>
+                            <% } %>
+
+                            <div class="blog-compact-item-content">
+                                <ul class="blog-post-tags">
+                                    <li>
+                                        <% var createdAt = new Date(image.createdAt);
+                                        var date = createdAt.getDate()+"";
+                                        %>
+                                        <%= date.padStart(2,"0")+" "+ months[createdAt.getMonth()]+", "+ createdAt.getFullYear() %>
+                                    </li>
+                                </ul>
+                                <h3><%= image.user.name %></h3>
+                            </div>
+                        </div>
+                        <p class="mx-3 text-black"><%= image.caption %></p>
+                    </a>
+                </div>
+            <% }) %>
+            <% } %>
+        </div>
+    </div>
+</div>
+</div>
+
+<%- include ('partials/footer') %>

@@ -1,0 +1,28 @@
+<%- include ("partials/header") %>
+<div class="display-100vh">
+<div class="container p-3">
+    <%= search.length %> Results found 
+</div>
+
+<div class="container p-3">
+    <ul class="list-group">
+<% for(var i=0;i< search.length;i++){ %>     
+            <!-- <%=i+1%>       -->
+            <li class="list-group-item m-3">
+            <div class="container">
+                
+            <a href="view-profile?id=<%= search[i]._id %>">
+            <div class="row align-items-center">
+                <img src="/public/images/1246351.svg" width="50px" alt="">
+                <h3 class="m-3 " style="color: blue;"><%=search[i].name %></h3>
+                
+            </div>
+        </a>
+            </div>
+        </li>
+            
+    <%}%>    
+</ul>
+</div>
+</div>
+<%- include ("partials/footer") %>
